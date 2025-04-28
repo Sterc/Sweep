@@ -89,7 +89,6 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
                             if (r.object.finished) {
                                 this.console.append(_('sweep_item_scan_complete'));
                                 Ext.defer(function() {
-                                    this.console.hide();
                                     this.refresh();
                                 }, 1000, this);
                             } else {

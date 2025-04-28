@@ -1,7 +1,7 @@
 --------------------
 Sweep
 --------------------
-Author: John Doe <john@doe.com>
+Author: Ilya Utkin <ilya@sterc.nl>
 --------------------
 
-A basic Extra for MODx Revolution 3.x.
+Modx Unused Files Cleaner

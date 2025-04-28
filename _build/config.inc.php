@@ -11,8 +11,8 @@ if (!defined('MODX_CORE_PATH')) {
 return [
     'name' => 'Sweep',
     'name_lower' => 'sweep',
-    'version' => '3.0.0',
-    'release' => 'pl',
+    'version' => '1.0.0',
+    'release' => 'beta',
     // Install package to site right after build
     'install' => true,
     // Which elements should be updated on package upgrade

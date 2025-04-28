@@ -11,7 +11,7 @@ class GetList extends GetListProcessor
 {
     public $objectType = 'SweepItem';
     public $classKey = SweepItem::class;
-    public $defaultSortField = 'id';
+    public $defaultSortField = 'size';
     public $defaultSortDirection = 'DESC';
     //public $permission = 'list';
 

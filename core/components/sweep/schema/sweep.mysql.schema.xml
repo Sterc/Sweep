@@ -3,6 +3,7 @@
     <object class="SweepItem" table="sweep_items" extends="xPDO\Om\xPDOSimpleObject">
         <field key="name" dbtype="varchar" precision="255" phptype="string" null="false" default=""/>
         <field key="path" dbtype="text" phptype="string" null="true" default=""/>
+        <field key="size" dbtype="int" precision="10" phptype="integer" null="false" default=""/>
         <field key="active" dbtype="tinyint" precision="1" phptype="boolean" null="true" default="1"/>
 
         <index alias="name" name="name" primary="false" unique="false" type="BTREE">

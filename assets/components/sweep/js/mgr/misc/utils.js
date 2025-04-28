@@ -1,3 +1,23 @@
+Sweep.utils.renderSize = function (value) {
+    if (value === null || value === undefined || value === '') {
+        return '0 KB';
+    }
+
+    var size = parseFloat(value);
+
+    if (isNaN(size) || size <= 0) {
+        return '0 KB';
+    }
+
+    if (size >= 1024 * 1024) {
+        return parseFloat((size / (1024 * 1024)).toFixed(2)).toString() + ' GB';
+    } else if (size >= 1024) {
+        return parseFloat((size / 1024).toFixed(2)).toString() + ' MB';
+    } else {
+        return parseFloat(size.toFixed(2)).toString() + ' KB';
+    }
+};
+
 Sweep.utils.renderBoolean = function (value) {
     return value
         ? String.format('<span class="green">{0}</span>', _('yes'))

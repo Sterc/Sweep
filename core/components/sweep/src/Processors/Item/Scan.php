@@ -41,7 +41,8 @@ class Scan extends Processor
                 $object = $this->modx->newObject($this->classKey);
                 $object->fromArray([
                     'name' => basename($path),
-                    'path' => $path
+                    'path' => $path,
+                    'size' => round(filesize($file) / 1024)
                 ]);
                 $object->save();
             }

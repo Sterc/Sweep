@@ -257,16 +257,16 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
     },
 
     getFields: function () {
-        return ['id', 'name', 'path', 'active', 'actions'];
+        return ['id', 'name', 'path', 'size', 'active', 'actions'];
     },
 
     getColumns: function () {
-        return [{
+        return [/*{
             header: _('sweep_item_id'),
             dataIndex: 'id',
             sortable: true,
             width: 70
-        }, {
+        },*/ {
             header: _('sweep_item_name'),
             dataIndex: 'name',
             sortable: true,
@@ -277,12 +277,19 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
             sortable: false,
             width: 250,
         }, {
+            header: _('sweep_item_size'),
+            dataIndex: 'size',
+            align: 'right',
+            renderer: Sweep.utils.renderSize,
+            sortable: true,
+            width: 70
+        }, /*{
             header: _('sweep_item_active'),
             dataIndex: 'active',
             renderer: Sweep.utils.renderBoolean,
             sortable: true,
             width: 100,
-        }, {
+        },*/ {
             header: _('sweep_grid_actions'),
             dataIndex: 'actions',
             renderer: Sweep.utils.renderActions,

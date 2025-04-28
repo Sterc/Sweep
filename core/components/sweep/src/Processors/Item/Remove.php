@@ -32,8 +32,18 @@ class Remove extends Processor
             if (!$object = $this->modx->getObject($this->classKey, $id)) {
                 return $this->failure($this->modx->lexicon('sweep_item_err_nf'));
             }
-
-            $object->remove();
+            
+            $path = MODX_BASE_PATH . ltrim($object->path, '/');
+            if (file_exists($path)) {
+                if (@unlink($path)) {
+                    $object->remove();
+                } else {
+                    return $this->failure($this->modx->lexicon('sweep_item_err_file_remove'));
+                }
+            } else {
+                $object->remove();
+                return $this->failure($this->modx->lexicon('sweep_item_err_file_nf'));
+            }
         }
 
         return $this->success();

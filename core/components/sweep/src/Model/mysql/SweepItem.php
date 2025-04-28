@@ -19,6 +19,7 @@ class SweepItem extends \Sweep\Model\SweepItem
         array (
             'name' => '',
             'path' => '',
+            'size' => 0,
             'active' => 1,
         ),
         'fieldMeta' => 
@@ -37,6 +38,14 @@ class SweepItem extends \Sweep\Model\SweepItem
                 'phptype' => 'string',
                 'null' => true,
                 'default' => '',
+            ),
+            'size' => 
+            array (
+                'dbtype' => 'int',
+                'precision' => '10',
+                'phptype' => 'integer',
+                'null' => false,
+                'default' => 0,
             ),
             'active' => 
             array (

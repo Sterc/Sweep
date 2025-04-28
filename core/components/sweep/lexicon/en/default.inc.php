@@ -11,6 +11,7 @@ $_lang['sweep_item_id'] = 'Id';
 $_lang['sweep_item_name'] = 'Name';
 $_lang['sweep_item_description'] = 'Description';
 $_lang['sweep_item_path'] = 'Path';
+$_lang['sweep_item_size'] = 'Size';
 $_lang['sweep_item_active'] = 'Active';
 
 $_lang['sweep_item_create'] = 'Create file';
@@ -33,6 +34,8 @@ $_lang['sweep_item_err_name'] = 'You must specify the name of file.';
 $_lang['sweep_item_err_ae'] = 'A file already exists with that name.';
 $_lang['sweep_item_err_nf'] = 'File not found.';
 $_lang['sweep_item_err_ns'] = 'File not specified.';
+$_lang['sweep_item_err_file_remove'] = 'Could not remove file.';
+$_lang['sweep_item_err_file_nf'] = 'File not found on disk. Removing record in database.';
 $_lang['sweep_item_err_remove'] = 'An error occurred while trying to remove the file.';
 $_lang['sweep_item_err_save'] = 'An error occurred while trying to save the file.';
 

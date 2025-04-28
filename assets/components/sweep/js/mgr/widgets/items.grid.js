@@ -68,7 +68,7 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
         this.console.append(_('console_running'));
 
         var start = 0;
-        var limit = 1;
+        var limit = 10;
 
         var runStep = function(start) {
             MODx.Ajax.request({

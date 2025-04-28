@@ -37,18 +37,23 @@ class Scan extends Processor
         foreach ($files as $file) {
             $path = str_replace(MODX_BASE_PATH, '/', $file);
 
-            if (!$object = $this->modx->getObject($this->classKey, ['path' => $path])) {
-                $object = $this->modx->newObject($this->classKey);
-                $object->fromArray([
-                    'name' => basename($path),
-                    'path' => $path,
-                    'size' => round(filesize($file) / 1024)
-                ]);
-                $object->save();
+            if ($this->isFileUsed($path)) {
+                if ($object = $this->modx->getObject($this->classKey, ['path' => $path])) {
+                    $object->remove();
+                }
+                $messages[] = sprintf('File is used: %s', $path);
+            } else {
+                if (!$object = $this->modx->getObject($this->classKey, ['path' => $path])) {
+                    $object = $this->modx->newObject($this->classKey);
+                    $object->fromArray([
+                        'name' => basename($path),
+                        'path' => $path,
+                        'size' => round(filesize($file) / 1024)
+                    ]);
+                    $object->save();
+                }
+                $messages[] = sprintf('File is NOT used: %s', $path);
             }
-
-            $messages[] = sprintf('Scanned file: %s', $path);
-            sleep(1);
         }
 
         $finished = ($this->start + $this->limit) >= $total;
@@ -61,6 +66,91 @@ class Scan extends Processor
             'messages' => $messages,
             'finished' => $finished
         ]);
+    }
+
+    protected function isFileUsed($path)
+    {
+        $relativePath = str_replace('uploads/', '', ltrim($path, '/'));
+    
+        if (!$relativePath) {
+            return false;
+        }
+
+        $tables_fields = [
+            'modResource' => ['content', 'introtext', 'description', 'properties'],
+            'modChunk'    => ['snippet'],
+            'modTemplate' => ['content'],
+            'modSnippet'  => ['snippet'],
+            'modPlugin'   => ['plugincode'],
+            'modTemplateVarResource' => ['value'],
+        ];
+
+        foreach ($tables_fields as $class => $fields) {
+            $q = $this->modx->newQuery($class);
+            $q->select($this->modx->getSelectColumns($class, $class, '', $fields));
+            if ($q->prepare() && $q->stmt->execute()) {
+                while ($row = $q->stmt->fetch(\PDO::FETCH_ASSOC)) {
+                    foreach ($fields as $field) {
+                        if (!empty($row[$field])) {
+                            $content = $row[$field];
+
+                            if (strpos($content, $relativePath) !== false) {
+                                return true;
+                            }
+
+                            $json = json_decode($content, true);
+                            if (is_array($json)) {
+                                if ($this->isUsedInJSON($json, $relativePath)) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($this->modx->getCount('modNamespace', ['name' => 'clientconfig'])) {
+            $q = $this->modx->newQuery('cgSetting');
+            $q->select(['value']);
+            if ($q->prepare() && $q->stmt->execute()) {
+                while ($row = $q->stmt->fetch(\PDO::FETCH_ASSOC)) {
+                    if (!empty($row['value'])) {
+                        $content = $row['value'];
+
+                        if (strpos($content, $relativePath) !== false) {
+                            return true;
+                        }
+
+                        $json = json_decode($content, true);
+                        if (is_array($json)) {
+                            if ($this->isUsedInJSON($json, $relativePath)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function isUsedInJSON($data, $needle)
+    {
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                if ($this->isUsedInJSON($value, $needle)) {
+                    return true;
+                }
+            } elseif (is_string($value)) {
+                if (strpos($value, $needle) !== false) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     protected function getAllFiles()

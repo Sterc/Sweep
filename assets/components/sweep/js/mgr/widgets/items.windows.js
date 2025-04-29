@@ -111,7 +111,7 @@ Sweep.window.Console = function(config) {
 
     Ext.applyIf(config, {
         title: config.title || 'Console',
-        width: config.width || '600px',
+        width: config.width || '960px',
         layout: 'fit',
         closeAction: 'hide',
         maximizable: true,

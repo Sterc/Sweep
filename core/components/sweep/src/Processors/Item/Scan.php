@@ -35,13 +35,14 @@ class Scan extends Processor
         $files = array_slice($allFiles, $this->start, $this->limit);
 
         foreach ($files as $file) {
-            $path = str_replace(MODX_BASE_PATH, '/', $file);
+            $path  = str_replace(MODX_BASE_PATH, '/', $file);
+            $usage = $this->whereFileUsed($path);
 
-            if ($this->isFileUsed($path)) {
+            if ($usage) {
                 if ($object = $this->modx->getObject($this->classKey, ['path' => $path])) {
                     $object->remove();
                 }
-                $messages[] = sprintf('File is used: %s', $path);
+                $messages[] = sprintf('File in use: %s %s', $path, $usage);
             } else {
                 if (!$object = $this->modx->getObject($this->classKey, ['path' => $path])) {
                     $object = $this->modx->newObject($this->classKey);
@@ -52,7 +53,7 @@ class Scan extends Processor
                     ]);
                     $object->save();
                 }
-                $messages[] = sprintf('File is NOT used: %s', $path);
+                $messages[] = sprintf('File UNUSED: %s', $path);
             }
         }
 
@@ -68,21 +69,25 @@ class Scan extends Processor
         ]);
     }
 
-    protected function isFileUsed($path)
+    protected function whereFileUsed($path)
     {
         $relativePath = str_replace('uploads/', '', ltrim($path, '/'));
-    
+
         if (!$relativePath) {
             return false;
         }
 
         $tables_fields = [
-            'modResource' => ['content', 'introtext', 'description', 'properties'],
-            'modChunk'    => ['snippet'],
-            'modTemplate' => ['content'],
-            'modSnippet'  => ['snippet'],
-            'modPlugin'   => ['plugincode'],
-            'modTemplateVarResource' => ['value'],
+            'modResource'            => ['id', 'content', 'introtext', 'description', 'properties'],
+            'modTemplateVarResource' => ['id', 'value'],
+            'modChunk'               => ['id', 'snippet'],
+            'modTemplate'            => ['id', 'content'],
+            'modSnippet'             => ['id', 'snippet'],
+            'modPlugin'              => ['id', 'plugincode'],
+            'cgSetting'              => ['id', 'value'],
+            'SiteLogo'               => ['id', 'title', 'url', 'logo'],
+            'SiteQuotes'             => ['id', 'author', 'img', 'text'],
+            'SiteReview'             => ['id', 'author', 'img', 'photo', 'text']
         ];
 
         foreach ($tables_fields as $class => $fields) {
@@ -91,45 +96,29 @@ class Scan extends Processor
             if ($q->prepare() && $q->stmt->execute()) {
                 while ($row = $q->stmt->fetch(\PDO::FETCH_ASSOC)) {
                     foreach ($fields as $field) {
-                        if (!empty($row[$field])) {
-                            $content = $row[$field];
-
-                            if (strpos($content, $relativePath) !== false) {
-                                return true;
-                            }
-
-                            $json = json_decode($content, true);
-                            if (is_array($json)) {
-                                if ($this->isUsedInJSON($json, $relativePath)) {
-                                    return true;
-                                }
-                            }
+                        if (!empty($row[$field]) && $this->isContentContainsPath($row[$field], $relativePath)) {
+                            return sprintf('in %s of %s (%s)', $field, $class, $row['id']);
                         }
                     }
                 }
             }
         }
 
-        if ($this->modx->getCount('modNamespace', ['name' => 'clientconfig'])) {
-            $q = $this->modx->newQuery('cgSetting');
-            $q->select(['value']);
-            if ($q->prepare() && $q->stmt->execute()) {
-                while ($row = $q->stmt->fetch(\PDO::FETCH_ASSOC)) {
-                    if (!empty($row['value'])) {
-                        $content = $row['value'];
+        return false;
+    }
 
-                        if (strpos($content, $relativePath) !== false) {
-                            return true;
-                        }
+    protected function isContentContainsPath($content, $relativePath)
+    {
+        $relativePathEncoded = str_replace(' ', '%20', $relativePath);
 
-                        $json = json_decode($content, true);
-                        if (is_array($json)) {
-                            if ($this->isUsedInJSON($json, $relativePath)) {
-                                return true;
-                            }
-                        }
-                    }
-                }
+        if (strpos($content, $relativePath) !== false || strpos($content, $relativePathEncoded) !== false) {
+            return true;
+        }
+
+        $json = json_decode($content, true);
+        if (is_array($json)) {
+            if ($this->isUsedInJSON($json, $relativePath) || $this->isUsedInJSON($json, $relativePathEncoded)) {
+                return true;
             }
         }
 
@@ -164,11 +153,34 @@ class Scan extends Processor
 
             foreach ($iterator as $fileinfo) {
                 if ($fileinfo->isFile()) {
-                    $files[] = $fileinfo->getPathname();
+                    $filePath = $fileinfo->getPathname();
+                    $extension = strtolower($fileinfo->getExtension());
+
+                    if ($extension === 'webp') {
+                        $baseName = pathinfo($filePath, PATHINFO_FILENAME);
+                        $dirName = $fileinfo->getPath();
+                        
+                        $possibleExtensions = ['jpg', 'jpeg', 'png'];
+                        $hasAlternative = false;
+
+                        foreach ($possibleExtensions as $ext) {
+                            $alternativePath = $dirName . DIRECTORY_SEPARATOR . $baseName . '.' . $ext;
+                            if (file_exists($alternativePath)) {
+                                $hasAlternative = true;
+                                break;
+                            }
+                        }
+
+                        if ($hasAlternative) {
+                            continue;
+                        }
+                    }
+
+                    $files[] = $filePath;
                 }
             }
         }
-
+        
         return $files;
     }
 }

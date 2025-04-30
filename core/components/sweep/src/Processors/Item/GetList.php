@@ -61,7 +61,6 @@ class GetList extends GetListProcessor
         $array = $object->toArray();
         $array['actions'] = [];
 
-        // Edit
         /*
         $array['actions'][] = [
             'cls' => '',
@@ -72,7 +71,6 @@ class GetList extends GetListProcessor
             'button' => true,
             'menu' => true,
         ];
-        */
 
         if (!$array['active']) {
             $array['actions'][] = [
@@ -85,7 +83,6 @@ class GetList extends GetListProcessor
                 'menu' => true,
             ];
         } else {
-            /*
             $array['actions'][] = [
                 'cls' => '',
                 'icon' => 'icon icon-power-off action-gray',
@@ -95,7 +92,6 @@ class GetList extends GetListProcessor
                 'button' => true,
                 'menu' => true,
             ];
-            */
 
             $array['actions'][] = [
                 'cls' => '',
@@ -107,6 +103,7 @@ class GetList extends GetListProcessor
                 'menu' => true,
             ];
         }
+        */
 
         // Remove
         $array['actions'][] = [

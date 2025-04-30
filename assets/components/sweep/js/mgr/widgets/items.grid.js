@@ -13,10 +13,12 @@ Sweep.grid.Items = function (config) {
             action: 'Sweep\\Processors\\Item\\GetList',
         },
         listeners: {
+            /*
             rowDblClick: function (grid, rowIndex, e) {
                 const row = grid.store.getAt(rowIndex);
                 this.updateItem(grid, e, row);
             }
+            */
         },
         viewConfig: {
             forceFit: true,
@@ -269,6 +271,9 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
             header: _('sweep_item_name'),
             dataIndex: 'name',
             sortable: true,
+            renderer: function (value, props, row) {
+                return '<a href="' + row.data.path + '" target="_blank">' + value + '</a>';
+            },
             width: 200,
         }, {
             header: _('sweep_item_path'),

@@ -9,5 +9,9 @@ $xpdo_meta_map = array (
         array (
             0 => 'Sweep\\Model\\SweepItem',
         ),
+        'xPDO\\Om\\xPDOObject' => 
+        array (
+            0 => 'Sweep\\Model\\SweepFile',
+        ),
     ),
 );

@@ -4,6 +4,7 @@ namespace Sweep\Processors\Item;
 
 use MODX\Revolution\Processors\Processor;
 use Sweep\Model\SweepItem;
+use Sweep\Model\SweepFile;
 
 class Scan extends Processor
 {
@@ -22,44 +23,54 @@ class Scan extends Processor
     public function process()
     {
         $messages = [];
-        $cacheKey = 'sweep/files';
 
-        $allFiles = $this->modx->cacheManager->get($cacheKey);
-
-        if (empty($allFiles) || $this->start === 0) {
-            $allFiles = $this->getAllFiles();
-            $this->modx->cacheManager->set($cacheKey, $allFiles);
+        if ($this->start === 0) {
+            $this->rescanDirectories();
         }
 
-        $total = count($allFiles);
-        $files = array_slice($allFiles, $this->start, $this->limit);
+        $total = $this->modx->getCount(SweepFile::class);
+
+        $query = $this->modx->newQuery(SweepFile::class);
+        $query->select($this->modx->getSelectColumns(SweepFile::class));
+        $query->limit($this->start, $this->limit);
+        $query->prepare();
+        $query->stmt->execute();
+        $files = $query->stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         foreach ($files as $file) {
-            $path = str_replace(MODX_BASE_PATH, '/', $file);
+            $path = $file['path'];
+            $usedon = $this->isFileUsed($path);
 
-            if ($this->isFileUsed($path)) {
-                if ($object = $this->modx->getObject($this->classKey, ['path' => $path])) {
-                    $object->remove();
-                }
-                $messages[] = sprintf('File in use: %s', $path);
+            if (!$object = $this->modx->getObject($this->classKey, ['path' => $path])) {
+                $object = $this->modx->newObject($this->classKey);
+                $object->fromArray([
+                    'name'   => basename($path),
+                    'path'   => $path,
+                    'size'   => round(filesize(MODX_BASE_PATH . trim($path, '/')) / 1024)
+                ]);
+            }
+
+            if (!empty($usedon)) {
+                $object->set('usedon', $usedon);
+                $messages[] = sprintf('File in use: %s %s', $path, $used);
             } else {
-                if (!$object = $this->modx->getObject($this->classKey, ['path' => $path])) {
-                    $object = $this->modx->newObject($this->classKey);
-                    $object->fromArray([
-                        'name' => basename($path),
-                        'path' => $path,
-                        'size' => round(filesize($file) / 1024)
-                    ]);
-                    $object->save();
-                }
+                $object->set('usedon', '');
                 $messages[] = sprintf('File UNUSED: %s', $path);
             }
+
+            $object->save();
         }
 
         $finished = ($this->start + $this->limit) >= $total;
 
         if ($finished) {
-            $this->modx->cacheManager->delete($cacheKey);
+            $itemTable = $this->modx->getTableName(SweepItem::class);
+            $fileTable = $this->modx->getTableName(SweepFile::class);
+            $sql = "DELETE `items` FROM $itemTable `items` LEFT JOIN $fileTable `files` ON `items`.`path` = `files`.`path` WHERE `files`.`path` IS NULL";
+            $stmt = $this->modx->prepare($sql);
+            $stmt->execute();
+    
+            $this->modx->removeCollection(SweepFile::class, ['path:IS NOT' => null]);
         }
 
         return $this->success('', [
@@ -76,33 +87,48 @@ class Scan extends Processor
         if (!$relativePath) {
             return false;
         }
-
+    
         $tables_fields = [
             'modResource' => ['content', 'introtext', 'description', 'properties'],
-            'modChunk'    => ['snippet'],
+            'modChunk' => ['snippet'],
             'modTemplate' => ['content'],
-            'modSnippet'  => ['snippet'],
-            'modPlugin'   => ['plugincode'],
+            'modSnippet' => ['snippet'],
+            'modPlugin' => ['plugincode'],
             'modTemplateVarResource' => ['value'],
         ];
+    
+        if ($this->modx->getCount('modNamespace', ['name' => 'clientconfig'])) {
+            $tables_fields['cgSetting'] = ['value'];
+        }
+    
+        if ($this->modx->getCount('modNamespace', ['name' => 'digitalsignage'])) {
+            $tables_fields['DigitalSignageSlides'] = ['data'];
+        }
 
         foreach ($tables_fields as $class => $fields) {
             $q = $this->modx->newQuery($class);
-            $q->select($this->modx->getSelectColumns($class, $class, '', $fields));
+            $q->select($this->modx->getSelectColumns($class, $class, '', array_merge(['id'], $fields)));
             if ($q->prepare() && $q->stmt->execute()) {
                 while ($row = $q->stmt->fetch(\PDO::FETCH_ASSOC)) {
+                    $output = sprintf('[%s](%s)', $class, $row['id']);
                     foreach ($fields as $field) {
                         if (!empty($row[$field])) {
                             $content = $row[$field];
-
-                            if (strpos($content, $relativePath) !== false || strpos($content, $relativePathEncoded) !== false) {
-                                return true;
+    
+                            if (
+                                strpos($content, $relativePath) !== false ||
+                                strpos($content, $relativePathEncoded) !== false
+                            ) {
+                                return $output;
                             }
-
+    
                             $json = json_decode($content, true);
                             if (is_array($json)) {
-                                if ($this->isUsedInJSON($json, $relativePath) || $this->isUsedInJSON($json, $relativePathEncoded)) {
-                                    return true;
+                                if (
+                                    $this->isUsedInJSON($json, $relativePath) ||
+                                    $this->isUsedInJSON($json, $relativePathEncoded)
+                                ) {
+                                    return $output;
                                 }
                             }
                         }
@@ -110,30 +136,7 @@ class Scan extends Processor
                 }
             }
         }
-
-        if ($this->modx->getCount('modNamespace', ['name' => 'clientconfig'])) {
-            $q = $this->modx->newQuery('cgSetting');
-            $q->select(['value']);
-            if ($q->prepare() && $q->stmt->execute()) {
-                while ($row = $q->stmt->fetch(\PDO::FETCH_ASSOC)) {
-                    if (!empty($row['value'])) {
-                        $content = $row['value'];
-
-                        if (strpos($content, $relativePath) !== false || strpos($content, $relativePathEncoded) !== false) {
-                            return true;
-                        }
-
-                        $json = json_decode($content, true);
-                        if (is_array($json)) {
-                            if ($this->isUsedInJSON($json, $relativePath) || $this->isUsedInJSON($json, $relativePathEncoded)) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
+    
         return false;
     }
 
@@ -154,10 +157,9 @@ class Scan extends Processor
         return false;
     }
 
-    protected function getAllFiles()
+    protected function rescanDirectories()
     {
         $path = MODX_BASE_PATH . 'uploads/';
-        $files = [];
 
         if (is_dir($path)) {
             $directory = new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS);
@@ -188,11 +190,15 @@ class Scan extends Processor
                         }
                     }
 
-                    $files[] = $filePath;
+                    $filePath = str_replace(MODX_BASE_PATH, '/', $filePath);
+
+                    if (!$object = $this->modx->getObject(SweepFile::class, ['path' => $filePath])) {
+                        $object = $this->modx->newObject(SweepFile::class);
+                        $object->set('path', $filePath);
+                        $object->save();
+                    }
                 }
             }
         }
-
-        return $files;
     }
 }

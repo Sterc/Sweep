@@ -13,4 +13,12 @@
             <column key="active" length="" collation="A" null="false"/>
         </index>
     </object>
+
+    <object class="SweepFile" table="sweep_files" extends="xPDO\Om\xPDOObject" engine="InnoDB CHARSET=utf8 COLLATE=utf8_general_ci">
+        <field key="path" dbtype="varchar" precision="1024" phptype="string" null="false" default=""/>
+
+        <index alias="PRIMARY" name="PRIMARY" primary="true" unique="true" type="BTREE">
+            <column key="path" length="1024" collation="A" null="false" />
+        </index>
+    </object>
 </model>

@@ -1,5 +1,11 @@
 Changelog for Sweep.
 
+1.0.1-beta
+==============
+- Added checkboxes
+- Added tab with used files
+
+
 1.0.0-beta
 ==============
 - Initial release

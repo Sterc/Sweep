@@ -3,12 +3,15 @@ Sweep.grid.Items = function (config) {
     if (!config.id) {
         config.id = 'sweep-grid-items';
     }
+
+    let SelectionModel = new Ext.grid.CheckboxSelectionModel();
+
     Ext.applyIf(config, {
         url: Sweep.config.connector_url,
         fields: this.getFields(config),
-        columns: this.getColumns(config),
+        columns: this.getColumns(SelectionModel),
         tbar: this.getTopBar(config),
-        sm: new Ext.grid.CheckboxSelectionModel(),
+        sm: SelectionModel,
         baseParams: {
             action: 'Sweep\\Processors\\Item\\GetList',
         },
@@ -261,8 +264,10 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
         return ['id', 'name', 'path', 'size', 'active', 'actions'];
     },
 
-    getColumns: function () {
-        return [/*{
+    getColumns: function (SelectionModel) {
+        return [
+            SelectionModel,
+        /*{
             header: _('sweep_item_id'),
             dataIndex: 'id',
             sortable: true,

@@ -2,12 +2,16 @@
 <model package="Sweep\Model" baseClass="xPDO\Om\xPDOObject" platform="mysql" defaultEngine="InnoDB" version="3.0">
     <object class="SweepItem" table="sweep_items" extends="xPDO\Om\xPDOSimpleObject">
         <field key="name" dbtype="varchar" precision="255" phptype="string" null="false" default=""/>
-        <field key="path" dbtype="text" phptype="string" null="true" default=""/>
+        <field key="path" dbtype="varchar" precision="1024" phptype="string" null="false" default=""/>
+        <field key="usedin" dbtype="varchar" precision="255" phptype="string" null="false" default=""/>
         <field key="size" dbtype="int" precision="10" phptype="integer" null="false" default=""/>
         <field key="active" dbtype="tinyint" precision="1" phptype="boolean" null="true" default="1"/>
 
         <index alias="name" name="name" primary="false" unique="false" type="BTREE">
             <column key="name" length="" collation="A" null="false"/>
+        </index>
+        <index alias="path" name="path" primary="false" unique="false" type="BTREE">
+            <column key="path" length="" collation="A" null="false"/>
         </index>
         <index alias="active" name="active" primary="false" unique="false" type="BTREE">
             <column key="active" length="" collation="A" null="false"/>
@@ -19,6 +23,18 @@
 
         <index alias="PRIMARY" name="PRIMARY" primary="true" unique="true" type="BTREE">
             <column key="path" length="1024" collation="A" null="false" />
+        </index>
+    </object>
+
+    <object class="SweepDirectory" table="sweep_directories" extends="xPDO\Om\xPDOSimpleObject" engine="InnoDB CHARSET=utf8 COLLATE=utf8_general_ci">
+        <field key="path" dbtype="varchar" precision="1024" phptype="string" null="false" default=""/>
+        <field key="active" dbtype="tinyint" precision="1" phptype="boolean" null="true" default="1"/>
+
+        <index alias="path" name="path" primary="false" unique="false" type="BTREE">
+            <column key="path" length="" collation="A" null="false"/>
+        </index>
+        <index alias="active" name="active" primary="false" unique="false" type="BTREE">
+            <column key="active" length="" collation="A" null="false"/>
         </index>
     </object>
 </model>

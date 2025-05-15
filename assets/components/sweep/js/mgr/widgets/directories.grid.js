@@ -1,7 +1,7 @@
-Sweep.grid.Items = function (config) {
+Sweep.grid.Directories = function (config) {
     config = config || {};
     if (!config.id) {
-        config.id = 'sweep-grid-items';
+        config.id = 'sweep-grid-directories';
     }
 
     let SelectionModel = new Ext.grid.CheckboxSelectionModel();
@@ -13,16 +13,14 @@ Sweep.grid.Items = function (config) {
         tbar: this.getTopBar(config),
         sm: SelectionModel,
         baseParams: {
-            action: 'Sweep\\Processors\\Item\\GetList',
+            action: 'Sweep\\Processors\\Directory\\GetList',
             used: 0
         },
         listeners: {
-            /*
             rowDblClick: function (grid, rowIndex, e) {
                 const row = grid.store.getAt(rowIndex);
                 this.updateItem(grid, e, row);
             }
-            */
         },
         viewConfig: {
             forceFit: true,
@@ -40,7 +38,7 @@ Sweep.grid.Items = function (config) {
         remoteSort: true,
         autoHeight: true,
     });
-    Sweep.grid.Items.superclass.constructor.call(this, config);
+    Sweep.grid.Directories.superclass.constructor.call(this, config);
 
     // Clear selection on grid refresh
     this.store.on('load', function () {
@@ -49,7 +47,7 @@ Sweep.grid.Items = function (config) {
         }
     }, this);
 };
-Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
+Ext.extend(Sweep.grid.Directories, MODx.grid.Grid, {
     windows: {},
 
     getMenu: function (grid, rowIndex) {
@@ -61,62 +59,9 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
         this.addContextMenuItem(menu);
     },
 
-    scanFiles: function(btn, e) {
-        if (!this.console) {
-            this.console = MODx.load({
-                xtype: 'sweep-window-console',
-                title: _('sweep_item_scan')
-            });
-        }
-    
-        this.console.show(Ext.getBody());
-        this.console.clear();
-        this.console.append(_('console_running'));
-
-        var start = 0;
-        var limit = 10;
-
-        var runStep = function(start) {
-            MODx.Ajax.request({
-                url: Sweep.config.connectorUrl,
-                params: {
-                    action: 'Sweep\\Processors\\Item\\Scan',
-                    start: start,
-                    limit: limit
-                },
-                listeners: {
-                    success: {fn: function(r) {
-                        if (r.success && r.object) {
-                            if (r.object.messages && r.object.messages.length) {
-                                Ext.each(r.object.messages, function(msg) {
-                                    this.console.append(msg);
-                                }, this);
-                            }
-                            if (r.object.finished) {
-                                this.console.append(_('sweep_item_scan_complete'));
-                                Ext.defer(function() {
-                                    this.refresh();
-                                }, 1000, this);
-                            } else {
-                                runStep.call(this, start + limit);
-                            }
-                        } else {
-                            this.console.append(_('sweep_item_scan_error'));
-                        }
-                    }, scope: this},
-                    failure: {fn: function(r) {
-                        this.console.append(_('sweep_item_scan_error'));
-                    }, scope: this}
-                }
-            });
-        };
-
-        runStep.call(this, start);
-    },
-
     createItem: function (btn, e) {
         const w = MODx.load({
-            xtype: 'sweep-item-window-create',
+            xtype: 'sweep-directory-window-create',
             id: Ext.id(),
             listeners: {
                 success: {
@@ -143,14 +88,14 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
         MODx.Ajax.request({
             url: this.config.url,
             params: {
-                action: 'Sweep\\Processors\\Item\\Get',
+                action: 'Sweep\\Processors\\Directory\\Get',
                 id: id
             },
             listeners: {
                 success: {
                     fn: function (r) {
                         const w = MODx.load({
-                            xtype: 'sweep-item-window-update',
+                            xtype: 'sweep-directory-window-update',
                             id: Ext.id(),
                             record: r,
                             listeners: {
@@ -184,7 +129,7 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
                 : _('sweep_item_remove_confirm'),
             url: this.config.url,
             params: {
-                action: 'Sweep\\Processors\\Item\\Remove',
+                action: 'Sweep\\Processors\\Directory\\Remove',
                 ids: Ext.util.JSON.encode(ids),
             },
             listeners: {
@@ -198,27 +143,6 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
         return true;
     },
 
-    arciveItem: function () {
-        const ids = this._getSelectedIds();
-        if (!ids.length) {
-            return false;
-        }
-        MODx.Ajax.request({
-            url: this.config.url,
-            params: {
-                action: 'Sweep\\Processors\\Item\\Archive',
-                ids: Ext.util.JSON.encode(ids),
-            },
-            listeners: {
-                success: {
-                    fn: function () {
-                        this.refresh();
-                    }, scope: this
-                }
-            }
-        })
-    },
-
     disableItem: function () {
         const ids = this._getSelectedIds();
         if (!ids.length) {
@@ -227,7 +151,7 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
         MODx.Ajax.request({
             url: this.config.url,
             params: {
-                action: 'Sweep\\Processors\\Item\\Disable',
+                action: 'Sweep\\Processors\\Directory\\Disable',
                 ids: Ext.util.JSON.encode(ids),
             },
             listeners: {
@@ -248,7 +172,7 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
         MODx.Ajax.request({
             url: this.config.url,
             params: {
-                action: 'Sweep\\Processors\\Item\\Enable',
+                action: 'Sweep\\Processors\\Directory\\Enable',
                 ids: Ext.util.JSON.encode(ids),
             },
             listeners: {
@@ -274,52 +198,25 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
             sortable: true,
             width: 70
         },*/ {
-            header: _('sweep_item_name'),
-            dataIndex: 'name',
-            sortable: true,
-            renderer: function (value, props, row) {
-                return '<a href="' + row.data.path + '" target="_blank">' + value + '</a>';
-            },
-            width: 200,
-        }, {
             header: _('sweep_item_path'),
             dataIndex: 'path',
             sortable: false,
             width: 250,
         }, {
-            header: _('sweep_item_size'),
-            dataIndex: 'size',
-            align: 'right',
-            renderer: Sweep.utils.renderSize,
-            sortable: true,
-            width: 70
-        }, /*{
             header: _('sweep_item_active'),
             dataIndex: 'active',
             renderer: Sweep.utils.renderBoolean,
             sortable: true,
             width: 100,
-        },*/ {
-            header: _('sweep_grid_actions'),
-            dataIndex: 'actions',
-            renderer: Sweep.utils.renderActions,
-            sortable: false,
-            width: 100,
-            id: 'actions'
         }];
     },
 
     getTopBar: function () {
         return [{
-            text: '<i class="icon icon-refresh"></i>&nbsp;&nbsp;' + _('sweep_item_scan'),
-            handler: this.scanFiles,
-            cls: 'primary-button',
-            scope: this
-        }, /* {
             text: '<i class="icon icon-plus"></i>&nbsp;&nbsp;' + _('sweep_item_create'),
             handler: this.createItem,
             scope: this
-        }, */ '->', {
+        }, '->', {
             xtype: 'sweep-field-search',
             width: 250,
             listeners: {
@@ -381,4 +278,4 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
         this.getBottomToolbar().changePage(1);
     },
 });
-Ext.reg('sweep-grid-items', Sweep.grid.Items);
+Ext.reg('sweep-grid-directories', Sweep.grid.Directories);

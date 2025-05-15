@@ -5,12 +5,17 @@ include_once 'setting.inc.php';
 $_lang['sweep'] = 'Sweep';
 $_lang['sweep_menu_desc'] = 'MODX Unused Files Cleaner.';
 $_lang['sweep_intro_msg'] = 'This tool scans your MODX site for uploaded files that are not used in any content, TVs, chunks, or other core components.';
+$_lang['sweep_intro_used_msg'] = 'Here you can find used files and where they used.';
+$_lang['sweep_intro_directories_msg'] = 'Here you can specify which directories should be scanned to find unused files. The path should be relative to the base path of the site.';
 
-$_lang['sweep_items'] = 'Files';
+$_lang['sweep_items'] = 'Files not in use';
+$_lang['sweep_used'] = 'Used files';
+$_lang['sweep_directories'] = 'Directories';
 $_lang['sweep_item_id'] = 'Id';
 $_lang['sweep_item_name'] = 'Name';
 $_lang['sweep_item_description'] = 'Description';
 $_lang['sweep_item_path'] = 'Path';
+$_lang['sweep_item_usedin'] = 'Used in';
 $_lang['sweep_item_size'] = 'Size';
 $_lang['sweep_item_active'] = 'Active';
 

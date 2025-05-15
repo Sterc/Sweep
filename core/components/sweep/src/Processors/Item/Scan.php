@@ -5,6 +5,7 @@ namespace Sweep\Processors\Item;
 use MODX\Revolution\Processors\Processor;
 use Sweep\Model\SweepItem;
 use Sweep\Model\SweepFile;
+use Sweep\Model\SweepDirectory;
 
 class Scan extends Processor
 {
@@ -39,7 +40,7 @@ class Scan extends Processor
 
         foreach ($files as $file) {
             $path = $file['path'];
-            $usedon = $this->isFileUsed($path);
+            $usedin = $this->isFileUsed($path);
 
             if (!$object = $this->modx->getObject($this->classKey, ['path' => $path])) {
                 $object = $this->modx->newObject($this->classKey);
@@ -50,11 +51,11 @@ class Scan extends Processor
                 ]);
             }
 
-            if (!empty($usedon)) {
-                $object->set('usedon', $usedon);
-                $messages[] = sprintf('File in use: %s %s', $path, $used);
+            if (!empty($usedin)) {
+                $object->set('usedin', $usedin);
+                $messages[] = sprintf('File in use: %s %s', $path, $usedin);
             } else {
-                $object->set('usedon', '');
+                $object->set('usedin', '');
                 $messages[] = sprintf('File UNUSED: %s', $path);
             }
 
@@ -69,8 +70,6 @@ class Scan extends Processor
             $sql = "DELETE `items` FROM $itemTable `items` LEFT JOIN $fileTable `files` ON `items`.`path` = `files`.`path` WHERE `files`.`path` IS NULL";
             $stmt = $this->modx->prepare($sql);
             $stmt->execute();
-    
-            $this->modx->removeCollection(SweepFile::class, ['path:IS NOT' => null]);
         }
 
         return $this->success('', [
@@ -107,10 +106,14 @@ class Scan extends Processor
 
         foreach ($tables_fields as $class => $fields) {
             $q = $this->modx->newQuery($class);
-            $q->select($this->modx->getSelectColumns($class, $class, '', array_merge(['id'], $fields)));
+            $q->select($this->modx->getSelectColumns($class));
             if ($q->prepare() && $q->stmt->execute()) {
                 while ($row = $q->stmt->fetch(\PDO::FETCH_ASSOC)) {
                     $output = sprintf('[%s](%s)', $class, $row['id']);
+                    
+                    if ($class == 'modTemplateVarResource') {
+                        $output = sprintf('[%s](%s){%s}', $class, $row['tmplvarid'], $row['contentid']);
+                    }
                     foreach ($fields as $field) {
                         if (!empty($row[$field])) {
                             $content = $row[$field];
@@ -159,8 +162,19 @@ class Scan extends Processor
 
     protected function rescanDirectories()
     {
-        $path = MODX_BASE_PATH . 'uploads/';
+        $this->modx->removeCollection(SweepFile::class, ['path:IS NOT' => null]);
 
+        $directories = $this->modx->getCollection(SweepDirectory::class, ['active' => true]);
+        foreach ($directories as $directory) {
+            $path = trim($directory->path, ' /');
+            if (!empty($path)) {
+                $this->scanDirectory(MODX_BASE_PATH . $path);
+            }
+        }
+    }
+    
+    protected function scanDirectory($path)
+    {
         if (is_dir($path)) {
             $directory = new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS);
             $iterator = new \RecursiveIteratorIterator($directory);

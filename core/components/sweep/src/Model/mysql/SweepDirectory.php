@@ -3,36 +3,26 @@ namespace Sweep\Model\mysql;
 
 use xPDO\xPDO;
 
-class SweepItem extends \Sweep\Model\SweepItem
+class SweepDirectory extends \Sweep\Model\SweepDirectory
 {
 
     public static $metaMap = array (
         'package' => 'Sweep\\Model',
         'version' => '3.0',
-        'table' => 'sweep_items',
+        'table' => 'sweep_directories',
         'extends' => 'xPDO\\Om\\xPDOSimpleObject',
+        'engine' => 'InnoDB CHARSET=utf8 COLLATE=utf8_general_ci',
         'tableMeta' => 
         array (
-            'engine' => 'InnoDB',
+            'engine' => 'InnoDB CHARSET=utf8 COLLATE=utf8_general_ci',
         ),
         'fields' => 
         array (
-            'name' => '',
             'path' => '',
-            'usedin' => '',
-            'size' => 0,
             'active' => 1,
         ),
         'fieldMeta' => 
         array (
-            'name' => 
-            array (
-                'dbtype' => 'varchar',
-                'precision' => '255',
-                'phptype' => 'string',
-                'null' => false,
-                'default' => '',
-            ),
             'path' => 
             array (
                 'dbtype' => 'varchar',
@@ -40,22 +30,6 @@ class SweepItem extends \Sweep\Model\SweepItem
                 'phptype' => 'string',
                 'null' => false,
                 'default' => '',
-            ),
-            'usedin' => 
-            array (
-                'dbtype' => 'varchar',
-                'precision' => '255',
-                'phptype' => 'string',
-                'null' => false,
-                'default' => '',
-            ),
-            'size' => 
-            array (
-                'dbtype' => 'int',
-                'precision' => '10',
-                'phptype' => 'integer',
-                'null' => false,
-                'default' => 0,
             ),
             'active' => 
             array (
@@ -68,22 +42,6 @@ class SweepItem extends \Sweep\Model\SweepItem
         ),
         'indexes' => 
         array (
-            'name' => 
-            array (
-                'alias' => 'name',
-                'primary' => false,
-                'unique' => false,
-                'type' => 'BTREE',
-                'columns' => 
-                array (
-                    'name' => 
-                    array (
-                        'length' => '',
-                        'collation' => 'A',
-                        'null' => false,
-                    ),
-                ),
-            ),
             'path' => 
             array (
                 'alias' => 'path',

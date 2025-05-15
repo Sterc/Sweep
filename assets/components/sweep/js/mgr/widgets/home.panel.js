@@ -29,6 +29,26 @@ Sweep.panel.Home = function (config) {
                     xtype: 'sweep-grid-items',
                     cls: 'main-wrapper',
                 }]
+            }, {
+                title: _('sweep_used'),
+                layout: 'anchor',
+                items: [{
+                    html: _('sweep_intro_used_msg'),
+                    cls: 'panel-desc',
+                }, {
+                    xtype: 'sweep-grid-used',
+                    cls: 'main-wrapper',
+                }]
+            }, {
+                title: _('sweep_directories'),
+                layout: 'anchor',
+                items: [{
+                    html: _('sweep_intro_directories_msg'),
+                    cls: 'panel-desc',
+                }, {
+                    xtype: 'sweep-grid-directories',
+                    cls: 'main-wrapper',
+                }]
             }]
         }]
     });

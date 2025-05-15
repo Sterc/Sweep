@@ -1,18 +1,18 @@
 <?php
 
-namespace Sweep\Processors\Item;
+namespace Sweep\Processors\Directory;
 
-use Sweep\Model\SweepItem;
+use Sweep\Model\SweepDirectory;
 use MODX\Revolution\Processors\Model\GetListProcessor;
 use xPDO\Om\xPDOQuery;
 use xPDO\Om\xPDOObject;
 
 class GetList extends GetListProcessor
 {
-    public $objectType = 'SweepItem';
-    public $classKey = SweepItem::class;
-    public $defaultSortField = 'size';
-    public $defaultSortDirection = 'DESC';
+    public $objectType = 'SweepDirectory';
+    public $classKey = SweepDirectory::class;
+    public $defaultSortField = 'path';
+    public $defaultSortDirection = 'ASC';
     //public $permission = 'list';
 
 
@@ -39,19 +39,6 @@ class GetList extends GetListProcessor
      */
     public function prepareQueryBeforeCount(xPDOQuery $c)
     {
-        $used = !empty($this->getProperty('used'));
-        if ($used) {
-            $c->where([
-                'usedin:IS NOT' => null,
-                'usedin:!=' => '',
-            ]);
-        } else {
-            $c->where([
-                'usedin:IS' => null,
-                'OR:usedin:=' => '',
-            ]);
-        }
-
         $query = trim($this->getProperty('query'));
         if ($query) {
             $c->where([
@@ -74,7 +61,6 @@ class GetList extends GetListProcessor
         $array = $object->toArray();
         $array['actions'] = [];
 
-        /*
         $array['actions'][] = [
             'cls' => '',
             'icon' => 'icon icon-edit',
@@ -105,32 +91,18 @@ class GetList extends GetListProcessor
                 'button' => true,
                 'menu' => true,
             ];
-
-            $array['actions'][] = [
-                'cls' => '',
-                'icon' => 'icon icon-list-alt action-gray',
-                'title' => $this->modx->lexicon('sweep_item_archive'),
-                'multiple' => $this->modx->lexicon('sweep_items_archive'),
-                'action' => 'arciveItem',
-                'button' => true,
-                'menu' => true,
-            ];
         }
-        */
 
-        $used = !empty($this->getProperty('used'));
-        if (!$used) {
-            // Remove
-            $array['actions'][] = [
-                'cls' => '',
-                'icon' => 'icon icon-trash-o action-red',
-                'title' => $this->modx->lexicon('sweep_item_remove'),
-                'multiple' => $this->modx->lexicon('sweep_items_remove'),
-                'action' => 'removeItem',
-                'button' => true,
-                'menu' => true,
-            ];
-        }
+        // Remove
+        $array['actions'][] = [
+            'cls' => '',
+            'icon' => 'icon icon-trash-o action-red',
+            'title' => $this->modx->lexicon('sweep_item_remove'),
+            'multiple' => $this->modx->lexicon('sweep_items_remove'),
+            'action' => 'removeItem',
+            'button' => true,
+            'menu' => true,
+        ];
 
         return $array;
     }

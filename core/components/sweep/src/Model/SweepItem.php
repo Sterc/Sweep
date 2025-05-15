@@ -1,5 +1,4 @@
 <?php
-
 namespace Sweep\Model;
 
 use xPDO\xPDO;
@@ -8,8 +7,9 @@ use xPDO\xPDO;
  * Class SweepItem
  *
  * @property string $name
- * @property string $description
- * @property boolean $active
+ * @property string $path
+ * @property string $usedin
+ * @property integer $size
  *
  * @package Sweep\Model
  */

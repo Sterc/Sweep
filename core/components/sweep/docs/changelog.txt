@@ -1,5 +1,17 @@
 Changelog for Sweep.
 
+1.0.3-beta
+==============
+- Fast scan files in first request
+- Fix directories lexicon
+
+1.0.2-beta
+==============
+- Added tab with directories
+- Added total size of found files
+- Added button Clean all
+
+
 1.0.1-beta
 ==============
 - Added checkboxes

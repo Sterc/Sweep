@@ -36,17 +36,17 @@ class Update extends UpdateProcessor
     {
         $id = (int)$this->getProperty('id');
         if (empty($id)) {
-            return $this->modx->lexicon('sweep_item_err_ns');
+            return $this->modx->lexicon('sweep_directory_err_ns');
         }
 
         $path = trim($this->getProperty('path'), ' /');
         if (empty($path)) {
-            $this->modx->error->addField('path', $this->modx->lexicon('sweep_item_err_name'));
+            $this->modx->error->addField('path', $this->modx->lexicon('sweep_directory_err_name'));
         }
 
         $path = $path . '/';
         if ($this->modx->getCount($this->classKey, ['path' => $path, 'id:!=' => $id])) {
-            $this->modx->error->addField('path', $this->modx->lexicon('sweep_item_err_ae'));
+            $this->modx->error->addField('path', $this->modx->lexicon('sweep_directory_err_ae'));
         }
 
         $this->setProperty('path', $path);

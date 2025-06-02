@@ -122,11 +122,11 @@ Ext.extend(Sweep.grid.Directories, MODx.grid.Grid, {
         }
         MODx.msg.confirm({
             title: ids.length > 1
-                ? _('sweep_items_remove')
-                : _('sweep_item_remove'),
+                ? _('sweep_directories_remove')
+                : _('sweep_directory_remove'),
             text: ids.length > 1
-                ? _('sweep_items_remove_confirm')
-                : _('sweep_item_remove_confirm'),
+                ? _('sweep_directories_remove_confirm')
+                : _('sweep_directory_remove_confirm'),
             url: this.config.url,
             params: {
                 action: 'Sweep\\Processors\\Directory\\Remove',
@@ -213,7 +213,7 @@ Ext.extend(Sweep.grid.Directories, MODx.grid.Grid, {
 
     getTopBar: function () {
         return [{
-            text: '<i class="icon icon-plus"></i>&nbsp;&nbsp;' + _('sweep_item_create'),
+            text: '<i class="icon icon-plus"></i>&nbsp;&nbsp;' + _('sweep_directory_create'),
             handler: this.createItem,
             scope: this
         }, '->', {

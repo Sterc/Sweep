@@ -43,9 +43,20 @@ Sweep.grid.Items = function (config) {
     Sweep.grid.Items.superclass.constructor.call(this, config);
 
     // Clear selection on grid refresh
-    this.store.on('load', function () {
+    this.store.on('load', function (store, records, success) {
         if (this._getSelectedIds().length) {
             this.getSelectionModel().clearSelections();
+        }
+
+        const raw = store.reader.jsonData;
+    
+        if (raw && raw.total_size !== undefined && raw.unused_size !== undefined) {
+            const total = raw.total;
+            const unused = Sweep.utils.renderSize(raw.unused_size);
+
+            Ext.getCmp('sweep-info-total-unused').setText(`<div class="topbar-text">${_('sweep_total_found')} ${total} ${_('sweep_unused_files')} (${_('sweep_total_size')} <b>${unused}</b>)</div>`);
+        } else {
+            Ext.getCmp('sweep-info-total-unused').setText('—');
         }
     }, this);
 };
@@ -96,6 +107,16 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
                                 this.console.append(_('sweep_item_scan_complete'));
                                 Ext.defer(function() {
                                     this.refresh();
+
+                                    const gridUsed = Ext.getCmp('sweep-grid-used');
+                                    if (gridUsed) {
+                                        gridUsed.getStore().reload();
+                                    }
+
+                                    const gridDirs = Ext.getCmp('sweep-grid-directories');
+                                    if (gridDirs) {
+                                        gridDirs.getStore().reload();
+                                    }
                                 }, 1000, this);
                             } else {
                                 runStep.call(this, start + limit);
@@ -172,29 +193,44 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
 
     removeItem: function () {
         const ids = this._getSelectedIds();
-        if (!ids.length) {
-            return false;
-        }
-        MODx.msg.confirm({
-            title: ids.length > 1
-                ? _('sweep_items_remove')
-                : _('sweep_item_remove'),
-            text: ids.length > 1
-                ? _('sweep_items_remove_confirm')
-                : _('sweep_item_remove_confirm'),
-            url: this.config.url,
-            params: {
-                action: 'Sweep\\Processors\\Item\\Remove',
-                ids: Ext.util.JSON.encode(ids),
-            },
-            listeners: {
-                success: {
-                    fn: function () {
-                        this.refresh();
-                    }, scope: this
+        if (ids.length > 0) {
+            MODx.msg.confirm({
+                title: ids.length > 1
+                    ? _('sweep_items_remove')
+                    : _('sweep_item_remove'),
+                text: ids.length > 1
+                    ? _('sweep_items_remove_confirm')
+                    : _('sweep_item_remove_confirm'),
+                url: this.config.url,
+                params: {
+                    action: 'Sweep\\Processors\\Item\\Remove',
+                    ids: Ext.util.JSON.encode(ids),
+                },
+                listeners: {
+                    success: {
+                        fn: function () {
+                            this.refresh();
+                        }, scope: this
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            MODx.msg.confirm({
+                title: _('sweep_items_remove_all'),
+                text: _('sweep_items_remove_all_confirm'),
+                url: this.config.url,
+                params: {
+                    action: 'Sweep\\Processors\\Item\\Remove',
+                },
+                listeners: {
+                    success: {
+                        fn: function () {
+                            this.refresh();
+                        }, scope: this
+                    }
+                }
+            });
+        }
         return true;
     },
 
@@ -276,7 +312,7 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
         },*/ {
             header: _('sweep_item_name'),
             dataIndex: 'name',
-            sortable: true,
+            sortable: false,
             renderer: function (value, props, row) {
                 return '<a href="' + row.data.path + '" target="_blank">' + value + '</a>';
             },
@@ -284,7 +320,7 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
         }, {
             header: _('sweep_item_path'),
             dataIndex: 'path',
-            sortable: false,
+            sortable: true,
             width: 250,
         }, {
             header: _('sweep_item_size'),
@@ -320,6 +356,17 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
             handler: this.createItem,
             scope: this
         }, */ '->', {
+            xtype: 'tbtext',
+            id: 'sweep-info-total-unused',
+            text: '',
+            style: 'display: flex; align-items: center; height: 34px;'
+        }, {
+            text: '<i class="icon icon-trash-o"></i>&nbsp;&nbsp;' + _('sweep_items_remove_all'),
+            handler: this.removeItem,
+            cls: 'red',
+            style: 'margin-right: 20px;',
+            scope: this
+        }, {
             xtype: 'sweep-field-search',
             width: 250,
             listeners: {

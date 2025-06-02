@@ -24,22 +24,19 @@ class Scan extends Processor
     public function process()
     {
         $messages = [];
+        $cacheKey = 'sweep/files';
 
-        if ($this->start === 0) {
-            $this->rescanDirectories();
+        $allFiles = $this->modx->cacheManager->get($cacheKey);
+
+        if (empty($allFiles) || $this->start === 0) {
+            $allFiles = $this->getAllFiles();
+            $this->modx->cacheManager->set($cacheKey, $allFiles);
         }
 
-        $total = $this->modx->getCount(SweepFile::class);
+        $total = count($allFiles);
+        $files = array_slice($allFiles, $this->start, $this->limit);
 
-        $query = $this->modx->newQuery(SweepFile::class);
-        $query->select($this->modx->getSelectColumns(SweepFile::class));
-        $query->limit($this->start, $this->limit);
-        $query->prepare();
-        $query->stmt->execute();
-        $files = $query->stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        foreach ($files as $file) {
-            $path = $file['path'];
+        foreach ($files as $path) {
             $usedin = $this->isFileUsed($path);
 
             if (!$object = $this->modx->getObject($this->classKey, ['path' => $path])) {
@@ -63,14 +60,6 @@ class Scan extends Processor
         }
 
         $finished = ($this->start + $this->limit) >= $total;
-
-        if ($finished) {
-            $itemTable = $this->modx->getTableName(SweepItem::class);
-            $fileTable = $this->modx->getTableName(SweepFile::class);
-            $sql = "DELETE `items` FROM $itemTable `items` LEFT JOIN $fileTable `files` ON `items`.`path` = `files`.`path` WHERE `files`.`path` IS NULL";
-            $stmt = $this->modx->prepare($sql);
-            $stmt->execute();
-        }
 
         return $this->success('', [
             'messages' => $messages,
@@ -110,21 +99,22 @@ class Scan extends Processor
             if ($q->prepare() && $q->stmt->execute()) {
                 while ($row = $q->stmt->fetch(\PDO::FETCH_ASSOC)) {
                     $output = sprintf('[%s](%s)', $class, $row['id']);
-                    
+
                     if ($class == 'modTemplateVarResource') {
                         $output = sprintf('[%s](%s){%s}', $class, $row['tmplvarid'], $row['contentid']);
                     }
+
                     foreach ($fields as $field) {
                         if (!empty($row[$field])) {
                             $content = $row[$field];
-    
+
                             if (
                                 strpos($content, $relativePath) !== false ||
                                 strpos($content, $relativePathEncoded) !== false
                             ) {
                                 return $output;
                             }
-    
+
                             $json = json_decode($content, true);
                             if (is_array($json)) {
                                 if (
@@ -139,7 +129,7 @@ class Scan extends Processor
                 }
             }
         }
-    
+
         return false;
     }
 
@@ -160,21 +150,30 @@ class Scan extends Processor
         return false;
     }
 
-    protected function rescanDirectories()
+    protected function getAllFiles()
     {
-        $this->modx->removeCollection(SweepFile::class, ['path:IS NOT' => null]);
+        $itemTable = $this->modx->getTableName(SweepItem::class);
+        $sql = "DELETE `items` FROM $itemTable `items`";
+        $stmt = $this->modx->prepare($sql);
+        $stmt->execute();
 
+        $allFiles = [];
         $directories = $this->modx->getCollection(SweepDirectory::class, ['active' => true]);
         foreach ($directories as $directory) {
             $path = trim($directory->path, ' /');
             if (!empty($path)) {
-                $this->scanDirectory(MODX_BASE_PATH . $path);
+                $files = $this->scanDirectory(MODX_BASE_PATH . $path);
+                $allFiles = array_merge($allFiles, $files);
             }
         }
+
+        return $allFiles;
     }
     
     protected function scanDirectory($path)
     {
+        $files = [];
+
         if (is_dir($path)) {
             $directory = new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS);
             $iterator = new \RecursiveIteratorIterator($directory);
@@ -204,15 +203,11 @@ class Scan extends Processor
                         }
                     }
 
-                    $filePath = str_replace(MODX_BASE_PATH, '/', $filePath);
-
-                    if (!$object = $this->modx->getObject(SweepFile::class, ['path' => $filePath])) {
-                        $object = $this->modx->newObject(SweepFile::class);
-                        $object->set('path', $filePath);
-                        $object->save();
-                    }
+                    $files[] = str_replace(MODX_BASE_PATH, '/', $filePath);
                 }
             }
         }
+
+        return $files;
     }
 }

@@ -20,12 +20,12 @@ class Create extends CreateProcessor
     {
         $path = trim($this->getProperty('path'), ' /');
         if (empty($path)) {
-            $this->modx->error->addField('path', $this->modx->lexicon('sweep_item_err_name'));
+            $this->modx->error->addField('path', $this->modx->lexicon('sweep_directory_err_name'));
         }
 
         $path = $path . '/';
         if ($this->modx->getCount($this->classKey, ['path' => $path])) {
-            $this->modx->error->addField('path', $this->modx->lexicon('sweep_item_err_ae'));
+            $this->modx->error->addField('path', $this->modx->lexicon('sweep_directory_err_ae'));
         }
 
         $this->setProperty('path', $path);

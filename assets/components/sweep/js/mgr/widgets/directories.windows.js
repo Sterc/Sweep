@@ -4,7 +4,7 @@ Sweep.window.CreateDirectory = function (config) {
         config.id = 'sweep-directory-window-create';
     }
     Ext.applyIf(config, {
-        title: _('sweep_item_create'),
+        title: _('sweep_directory_create'),
         width: 550,
         autoHeight: true,
         url: Sweep.config.connector_url,
@@ -49,7 +49,7 @@ Sweep.window.UpdateDirectory = function (config) {
         config.id = 'sweep-directory-window-update';
     }
     Ext.applyIf(config, {
-        title: _('sweep_item_update'),
+        title: _('sweep_directory_update'),
         width: 550,
         autoHeight: true,
         url: Sweep.config.connector_url,
@@ -89,49 +89,3 @@ Ext.extend(Sweep.window.UpdateDirectory, MODx.Window, {
 
 });
 Ext.reg('sweep-directory-window-update', Sweep.window.UpdateDirectory);
-
-Sweep.window.Console = function(config) {
-    config = config || {};
-
-    Ext.applyIf(config, {
-        title: config.title || 'Console',
-        width: config.width || '960px',
-        layout: 'fit',
-        closeAction: 'hide',
-        maximizable: true,
-        minimizable: true,
-        items: [{
-            xtype: 'textarea',
-            id: config.textareaId || 'custom-console-textarea',
-            style: 'font-family: monospace; font-size: 12px; border: 0;',
-            height: config.height || '350px',
-            readOnly: true,
-            enableKeyEvents: false,
-            border: false
-        }]
-    });
-
-    Sweep.window.Console.superclass.constructor.call(this, config);
-
-    this.textareaId = config.textareaId || 'custom-console-textarea';
-};
-
-Ext.extend(Sweep.window.Console, Ext.Window, {
-    append: function(text) {
-        var textarea = Ext.getCmp(this.textareaId);
-        if (textarea) {
-            var current = textarea.getValue();
-            textarea.setValue(current + (current ? "\n" : '') + text);
-            textarea.el.dom.scrollTop = textarea.el.dom.scrollHeight;
-        }
-    },
-
-    clear: function() {
-        var textarea = Ext.getCmp(this.textareaId);
-        if (textarea) {
-            textarea.setValue('');
-        }
-    }
-});
-
-Ext.reg('sweep-window-console', Sweep.window.Console);

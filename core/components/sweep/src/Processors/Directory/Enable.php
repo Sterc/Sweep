@@ -25,13 +25,13 @@ class Enable extends Processor
 
         $ids = $this->modx->fromJSON($this->getProperty('ids'));
         if (empty($ids)) {
-            return $this->failure($this->modx->lexicon('sweep_item_err_ns'));
+            return $this->failure($this->modx->lexicon('sweep_directory_err_ns'));
         }
 
         foreach ($ids as $id) {
             /** @var SweepItem $object */
             if (!$object = $this->modx->getObject($this->classKey, $id)) {
-                return $this->failure($this->modx->lexicon('sweep_item_err_nf'));
+                return $this->failure($this->modx->lexicon('sweep_directory_err_nf'));
             }
 
             $object->set('active', true);

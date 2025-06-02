@@ -32,8 +32,10 @@ $_lang['sweep_item_archive'] = 'Archive file';
 $_lang['sweep_items_archive'] = 'Archive files';
 $_lang['sweep_item_remove'] = 'Remove file';
 $_lang['sweep_items_remove'] = 'Remove files';
+$_lang['sweep_items_remove_all'] = 'Clean all';
 $_lang['sweep_item_remove_confirm'] = 'Are you sure you want to remove this file?';
 $_lang['sweep_items_remove_confirm'] = 'Are you sure you want to remove this files?';
+$_lang['sweep_items_remove_all_confirm'] = 'Are you sure you want to remove all files marked as unused?';
 
 $_lang['sweep_item_err_name'] = 'You must specify the name of file.';
 $_lang['sweep_item_err_ae'] = 'A file already exists with that name.';
@@ -46,3 +48,26 @@ $_lang['sweep_item_err_save'] = 'An error occurred while trying to save the file
 
 $_lang['sweep_grid_search'] = 'Search';
 $_lang['sweep_grid_actions'] = 'Actions';
+
+$_lang['sweep_total_found'] = 'Found';
+$_lang['sweep_unused_files'] = 'unused files';
+$_lang['sweep_used_files'] = 'used files';
+$_lang['sweep_total_size'] = 'Total size';
+
+$_lang['sweep_directory_create'] = 'Create directory';
+$_lang['sweep_directory_update'] = 'Update directory';
+$_lang['sweep_directory_enable'] = 'Enable directory';
+$_lang['sweep_directories_enable'] = 'Enable directories';
+$_lang['sweep_directory_disable'] = 'Disable directory';
+$_lang['sweep_directories_disable'] = 'Disable directories';
+$_lang['sweep_directory_remove'] = 'Remove directory';
+$_lang['sweep_directories_remove'] = 'Remove directories';
+$_lang['sweep_directory_remove_confirm'] = 'Are you sure you want to remove this directory?';
+$_lang['sweep_directories_remove_confirm'] = 'Are you sure you want to remove this directories?';
+
+$_lang['sweep_directory_err_name'] = 'You must specify the name of directory.';
+$_lang['sweep_directory_err_ae'] = 'A directory already exists with that name.';
+$_lang['sweep_directory_err_nf'] = 'Directory not found.';
+$_lang['sweep_directory_err_ns'] = 'Directory not specified.';
+$_lang['sweep_directory_err_remove'] = 'An error occurred while trying to remove the directory.';
+$_lang['sweep_directory_err_save'] = 'An error occurred while trying to save the directory.';

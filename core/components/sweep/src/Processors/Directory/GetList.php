@@ -64,8 +64,8 @@ class GetList extends GetListProcessor
         $array['actions'][] = [
             'cls' => '',
             'icon' => 'icon icon-edit',
-            'title' => $this->modx->lexicon('sweep_item_update'),
-            //'multiple' => $this->modx->lexicon('sweep_items_update'),
+            'title' => $this->modx->lexicon('sweep_directory_update'),
+            //'multiple' => $this->modx->lexicon('sweep_directories_update'),
             'action' => 'updateItem',
             'button' => true,
             'menu' => true,
@@ -75,8 +75,8 @@ class GetList extends GetListProcessor
             $array['actions'][] = [
                 'cls' => '',
                 'icon' => 'icon icon-play-circle-o action-green',
-                'title' => $this->modx->lexicon('sweep_item_enable'),
-                'multiple' => $this->modx->lexicon('sweep_items_enable'),
+                'title' => $this->modx->lexicon('sweep_directory_enable'),
+                'multiple' => $this->modx->lexicon('sweep_directories_enable'),
                 'action' => 'enableItem',
                 'button' => true,
                 'menu' => true,
@@ -85,8 +85,8 @@ class GetList extends GetListProcessor
             $array['actions'][] = [
                 'cls' => '',
                 'icon' => 'icon icon-power-off action-gray',
-                'title' => $this->modx->lexicon('sweep_item_disable'),
-                'multiple' => $this->modx->lexicon('sweep_items_disable'),
+                'title' => $this->modx->lexicon('sweep_directory_disable'),
+                'multiple' => $this->modx->lexicon('sweep_directories_disable'),
                 'action' => 'disableItem',
                 'button' => true,
                 'menu' => true,
@@ -97,8 +97,8 @@ class GetList extends GetListProcessor
         $array['actions'][] = [
             'cls' => '',
             'icon' => 'icon icon-trash-o action-red',
-            'title' => $this->modx->lexicon('sweep_item_remove'),
-            'multiple' => $this->modx->lexicon('sweep_items_remove'),
+            'title' => $this->modx->lexicon('sweep_directory_remove'),
+            'multiple' => $this->modx->lexicon('sweep_directories_remove'),
             'action' => 'removeItem',
             'button' => true,
             'menu' => true,

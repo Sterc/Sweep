@@ -15,7 +15,6 @@ class GetList extends GetListProcessor
     public $defaultSortDirection = 'DESC';
     //public $permission = 'list';
 
-
     /**
      * We do a special check of permissions
      * because our objects is not an instances of modAccessibleObject
@@ -63,6 +62,25 @@ class GetList extends GetListProcessor
         return $c;
     }
 
+    public function outputArray(array $array, $count = false)
+    {
+        $output = json_decode(parent::outputArray($array, $count), true);
+
+        $q = $this->modx->newQuery($this->classKey);
+        $q->select([
+            'total_size'  => 'SUM(`size`)',
+            'used_size'   => 'SUM(IF(`usedin` IS NOT NULL AND `usedin` != \'\', `size`, 0))',
+            'unused_size' => 'SUM(IF(`usedin` IS NULL OR `usedin` = \'\', size, 0))'
+        ]);
+
+        $q->prepare();
+        $q->stmt->execute();
+        $result = $q->stmt->fetch(\PDO::FETCH_ASSOC);
+        
+        $output = array_merge($output, $result);
+
+        return json_encode($output, JSON_INVALID_UTF8_SUBSTITUTE);
+    }
 
     /**
      * @param xPDOObject $object

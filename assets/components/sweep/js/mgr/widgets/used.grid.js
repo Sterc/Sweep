@@ -44,9 +44,20 @@ Sweep.grid.Used = function (config) {
     Sweep.grid.Used.superclass.constructor.call(this, config);
 
     // Clear selection on grid refresh
-    this.store.on('load', function () {
+    this.store.on('load', function (store, records, success) {
         if (this._getSelectedIds().length) {
             this.getSelectionModel().clearSelections();
+        }
+
+        const raw = store.reader.jsonData;
+    
+        if (raw && raw.total_size !== undefined && raw.unused_size !== undefined) {
+            const total = raw.total;
+            const used = Sweep.utils.renderSize(raw.used_size);
+
+            Ext.getCmp('sweep-info-total-used').setText(`<div class="topbar-text">${_('sweep_total_found')} ${total} ${_('sweep_used_files')} (${_('sweep_total_size')} <b>${used}</b>)</div>`);
+        } else {
+            Ext.getCmp('sweep-info-total-used').setText('—');
         }
     }, this);
 };
@@ -77,7 +88,7 @@ Ext.extend(Sweep.grid.Used, MODx.grid.Grid, {
         },*/ {
             header: _('sweep_item_name'),
             dataIndex: 'name',
-            sortable: true,
+            sortable: false,
             renderer: function (value, props, row) {
                 return '<a href="' + row.data.path + '" target="_blank">' + value + '</a>';
             },
@@ -85,7 +96,7 @@ Ext.extend(Sweep.grid.Used, MODx.grid.Grid, {
         }, {
             header: _('sweep_item_path'),
             dataIndex: 'path',
-            sortable: false,
+            sortable: true,
             width: 220,
         }, {
             header: _('sweep_item_size'),
@@ -97,7 +108,7 @@ Ext.extend(Sweep.grid.Used, MODx.grid.Grid, {
         }, {
             header: _('sweep_item_usedin'),
             dataIndex: 'usedin',
-            sortable: false,
+            sortable: true,
             width: 220,
         }, /*{
             header: _('sweep_item_active'),
@@ -120,7 +131,12 @@ Ext.extend(Sweep.grid.Used, MODx.grid.Grid, {
             text: '<i class="icon icon-plus"></i>&nbsp;&nbsp;' + _('sweep_item_create'),
             handler: this.createItem,
             scope: this
-        }, */ '->', {
+        }, */ {
+            xtype: 'tbtext',
+            id: 'sweep-info-total-used',
+            text: '',
+            style: 'display: flex; align-items: center; height: 34px;'
+        }, '->', {
             xtype: 'sweep-field-search',
             width: 250,
             listeners: {

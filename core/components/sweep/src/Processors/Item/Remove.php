@@ -21,18 +21,19 @@ class Remove extends Processor
         if (!$this->checkPermissions()) {
             return $this->failure($this->modx->lexicon('access_denied'));
         }
+        $where = ['usedin:IS' => null, 'OR:usedin:=' => ''];
 
         $ids = json_decode($this->getProperty('ids'), true);
-        if (empty($ids)) {
-            return $this->failure($this->modx->lexicon('sweep_item_err_ns'));
+        if (!empty($ids)) {
+            $where['id:IN'] = $ids;
         }
 
-        foreach ($ids as $id) {
-            /** @var SweepItem $object */
-            if (!$object = $this->modx->getObject($this->classKey, $id)) {
-                return $this->failure($this->modx->lexicon('sweep_item_err_nf'));
-            }
-            
+        if (!$objects = $this->modx->getIterator($this->classKey, $where)) {
+            return $this->failure($this->modx->lexicon('sweep_item_err_nf'));
+        }
+
+        /** @var SweepItem $object */
+        foreach ($objects as $object) {
             $path = MODX_BASE_PATH . ltrim($object->path, '/');
             if (file_exists($path)) {
                 if (@unlink($path)) {

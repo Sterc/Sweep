@@ -1,5 +1,9 @@
 Changelog for Sweep.
 
+1.0.4-beta
+==============
+- Fix directory creating on install
+
 1.0.3-beta
 ==============
 - Fast scan files in first request

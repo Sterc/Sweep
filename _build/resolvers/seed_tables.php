@@ -13,7 +13,7 @@ if ($transport->xpdo) {
         case xPDOTransport::ACTION_INSTALL:
         case xPDOTransport::ACTION_UPGRADE:
             $modx->addPackage('Sweep\Model', MODX_CORE_PATH . 'components/sweep/src/', null, 'Sweep\\');
-            if (!$object = $modx->getObject(SweepDirectory::class, ['id:>' => 1])) {
+            if ($modx->getCount(SweepDirectory::class) === 0) {
                 $object = $modx->newObject(SweepDirectory::class);
                 $object->set('path', 'uploads/');
                 $object->save();

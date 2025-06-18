@@ -31,7 +31,7 @@ $_lang['sweep_items_disable'] = 'Bestanden uitschakelen';
 $_lang['sweep_item_archive'] = 'Bestand archiveren';
 $_lang['sweep_items_archive'] = 'Bestanden archiveren';
 $_lang['sweep_item_remove'] = 'Bestand verwijderen';
-$_lang['sweep_items_remove'] = 'Bestanden verwijderen';
+$_lang['sweep_items_remove'] = 'Geselecteerde bestanden verwijderen';
 $_lang['sweep_items_remove_all'] = 'Alles opschonen';
 $_lang['sweep_item_remove_confirm'] = 'Weet u zeker dat u dit bestand wilt verwijderen?';
 $_lang['sweep_items_remove_confirm'] = 'Weet u zeker dat u deze bestanden wilt verwijderen?';
@@ -53,6 +53,8 @@ $_lang['sweep_total_found'] = 'Gevonden';
 $_lang['sweep_unused_files'] = 'ongebruikte bestanden';
 $_lang['sweep_used_files'] = 'gebruikte bestanden';
 $_lang['sweep_total_size'] = 'Totale grootte';
+
+$_lang['sweep_selected'] = 'Geselecteerde';
 
 $_lang['sweep_directory_create'] = 'Map aanmaken';
 $_lang['sweep_directory_update'] = 'Map bijwerken';

@@ -39,7 +39,7 @@ class Remove extends Processor
                 if (@unlink($path)) {
                     $object->remove();
                 } else {
-                    return $this->failure($this->modx->lexicon('sweep_item_err_file_remove'));
+                    return $this->failure($object->path . ': ' . $this->modx->lexicon('sweep_item_err_file_remove'));
                 }
             } else {
                 $object->remove();

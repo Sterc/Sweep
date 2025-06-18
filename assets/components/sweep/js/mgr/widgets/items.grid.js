@@ -6,6 +6,10 @@ Sweep.grid.Items = function (config) {
 
     let SelectionModel = new Ext.grid.CheckboxSelectionModel();
 
+    SelectionModel.on('selectionchange', function () {
+        this.updateInfoBar();
+    }, this);
+
     Ext.applyIf(config, {
         url: Sweep.config.connector_url,
         fields: this.getFields(config),
@@ -47,17 +51,8 @@ Sweep.grid.Items = function (config) {
         if (this._getSelectedIds().length) {
             this.getSelectionModel().clearSelections();
         }
-
-        const raw = store.reader.jsonData;
     
-        if (raw && raw.total_size !== undefined && raw.unused_size !== undefined) {
-            const total = raw.total;
-            const unused = Sweep.utils.renderSize(raw.unused_size);
-
-            Ext.getCmp('sweep-info-total-unused').setText(`<div class="topbar-text">${_('sweep_total_found')} ${total} ${_('sweep_unused_files')} (${_('sweep_total_size')} <b>${unused}</b>)</div>`);
-        } else {
-            Ext.getCmp('sweep-info-total-unused').setText('—');
-        }
+        this.updateInfoBar();
     }, this);
 };
 Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
@@ -362,6 +357,7 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
             style: 'display: flex; align-items: center; height: 34px;'
         }, {
             text: '<i class="icon icon-trash-o"></i>&nbsp;&nbsp;' + _('sweep_items_remove_all'),
+            id: 'sweep-button-remove',
             handler: this.removeItem,
             cls: 'red',
             style: 'margin-right: 20px;',
@@ -402,6 +398,36 @@ Ext.extend(Sweep.grid.Items, MODx.grid.Grid, {
             }
         }
         return this.processEvent('click', e);
+    },
+
+    updateInfoBar: function () {
+        const sm = this.getSelectionModel();
+        const selected = sm.getSelections();
+        const count = selected.length;
+        const infoBlock = Ext.getCmp('sweep-info-total-unused');
+        const btnRemove = Ext.getCmp('sweep-button-remove');
+    
+        if (count > 0) {
+            let totalSize = 0;
+            for (let i = 0; i < count; i++) {
+                totalSize += parseInt(selected[i].data.size) || 0;
+            }
+            const renderedSize = Sweep.utils.renderSize(totalSize);
+    
+            infoBlock.setText(`<div class="topbar-text">${_('sweep_selected')} <b>${count}</b> ${_('sweep_unused_files')} (${_('sweep_total_size')} <b>${renderedSize}</b>)</div>`);
+            btnRemove.setText('<i class="icon icon-trash-o"></i>&nbsp;&nbsp;' + _('sweep_items_remove'));
+        } else {
+            const raw = this.store.reader.jsonData;
+            if (raw && raw.total_size !== undefined && raw.unused_size !== undefined) {
+                const total = raw.total;
+                const unused = Sweep.utils.renderSize(raw.unused_size);
+                infoBlock.setText(`<div class="topbar-text">${_('sweep_total_found')} ${total} ${_('sweep_unused_files')} (${_('sweep_total_size')} <b>${unused}</b>)</div>`);
+            } else {
+                infoBlock.setText('—');
+            }
+
+            btnRemove.setText('<i class="icon icon-trash-o"></i>&nbsp;&nbsp;' + _('sweep_items_remove_all'));
+        }
     },
 
     _getSelectedIds: function () {

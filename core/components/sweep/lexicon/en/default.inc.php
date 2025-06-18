@@ -31,7 +31,7 @@ $_lang['sweep_items_disable'] = 'Disable files';
 $_lang['sweep_item_archive'] = 'Archive file';
 $_lang['sweep_items_archive'] = 'Archive files';
 $_lang['sweep_item_remove'] = 'Remove file';
-$_lang['sweep_items_remove'] = 'Remove files';
+$_lang['sweep_items_remove'] = 'Remove selected files';
 $_lang['sweep_items_remove_all'] = 'Clean all';
 $_lang['sweep_item_remove_confirm'] = 'Are you sure you want to remove this file?';
 $_lang['sweep_items_remove_confirm'] = 'Are you sure you want to remove this files?';
@@ -53,6 +53,8 @@ $_lang['sweep_total_found'] = 'Found';
 $_lang['sweep_unused_files'] = 'unused files';
 $_lang['sweep_used_files'] = 'used files';
 $_lang['sweep_total_size'] = 'Total size';
+
+$_lang['sweep_selected'] = 'Selected';
 
 $_lang['sweep_directory_create'] = 'Create directory';
 $_lang['sweep_directory_update'] = 'Update directory';

@@ -1,5 +1,9 @@
 Changelog for Sweep.
 
+1.0.6-beta
+==============
+- Fix displaying files with zero size
+
 1.0.5-beta
 ==============
 - Add option to select and delete multiple items at once

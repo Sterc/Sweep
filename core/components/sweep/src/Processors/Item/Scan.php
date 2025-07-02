@@ -40,12 +40,15 @@ class Scan extends Processor
             $usedin = $this->isFileUsed($path);
 
             if (!$object = $this->modx->getObject($this->classKey, ['path' => $path])) {
-                $object = $this->modx->newObject($this->classKey);
-                $object->fromArray([
-                    'name'   => basename($path),
-                    'path'   => $path,
-                    'size'   => round(filesize(MODX_BASE_PATH . trim($path, '/')) / 1024)
-                ]);
+                $size = round(filesize(MODX_BASE_PATH . trim($path, '/')) / 1024);
+                if ($size > 0) {
+                    $object = $this->modx->newObject($this->classKey);
+                    $object->fromArray([
+                        'name'   => basename($path),
+                        'path'   => $path,
+                        'size'   => $size
+                    ]);
+                }
             }
 
             if (!empty($usedin)) {
